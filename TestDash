@@ -48,14 +48,14 @@
     </div>
 
     <script>
-        const AIRTABLE_API_KEY = "YOUR_AIRTABLE_API_KEY";
-        const AIRTABLE_BASE_ID = "YOUR_AIRTABLE_BASE_ID";
-        const TABLE_NAME = "YOUR_TABLE_NAME";
+        const AIRTABLE_API_KEY = "patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143";
+        const AIRTABLE_BASE_ID = "appHVsweCzGGS1xdB";
+        const TABLE_NAME = "Life Insurance Leads";
 
         async function fetchAirtableData() {
-            const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${TABLE_NAME}`;
+            const url = `https://airtable.com/appHVsweCzGGS1xdB/tblSWJ7dkHmarMFCH/viwtD0dOmby5gmNK0`;
             const response = await fetch(url, {
-                headers: { "Authorization": `Bearer ${AIRTABLE_API_KEY}` }
+                headers: { "Authorization": `Bearer ${patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143}` }
             });
             const data = await response.json();
             return data.records;
