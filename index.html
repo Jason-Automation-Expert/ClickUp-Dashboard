@@ -23,13 +23,16 @@
             display: flex;
             justify-content: space-around;
             margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .card {
             padding: 20px;
             background: #007bff;
             color: white;
             border-radius: 5px;
-            width: 30%;
+            width: calc(25% - 20px);
+            min-width: 200px;
         }
     </style>
 </head>
@@ -38,18 +41,18 @@
         <h2>Commission Dashboard</h2>
         
         <div class="metrics">
-            <div class="card" id="totalFYC">Total FYC: $0</div>
-            <div class="card" id="totalGDC">Total GDC: $0</div>
-            <div class="card" id="benGDC">Ben GDC: $0</div>
-            <div class="card" id="joshGDC">Josh GDC: $0</div>
+            <div class="card" id="totalFYC">Loading...</div>
+            <div class="card" id="totalGDC">Loading...</div>
+            <div class="card" id="benGDC">Loading...</div>
+            <div class="card" id="joshGDC">Loading...</div>
         </div>
 
         <canvas id="chart"></canvas>
     </div>
 
     <script>
-        // Move these to environment variables or secure configuration in production
-        const AIRTABLE_API_KEY = "patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143";
+        /* Configuration */
+       const AIRTABLE_API_KEY = "patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143";
         const AIRTABLE_BASE_ID = "appHVsweCzGGS1xdB";
         const TABLE_ID = "tblSWJ7dkHmarMFCH";
 
@@ -75,7 +78,7 @@
             }
         }
 
-            async function updateDashboard() {
+        async function updateDashboard() {
             try {
                 const records = await fetchAirtableData();
                 
@@ -95,7 +98,6 @@
                     const benGdcValue = parseFloat(record.fields["Ben GDC"]) || 0;
                     const joshGdcValue = parseFloat(record.fields["Josh GDC"]) || 0;
                     
-                    // Get month from created time or a date field if available
                     const date = new Date(record.fields["Created Time"] || record.createdTime);
                     const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
 
@@ -104,7 +106,6 @@
                     benGDC += benGdcValue;
                     joshGDC += joshGdcValue;
 
-                    // Aggregate monthly data for the chart
                     if (!monthlyData[monthYear]) {
                         monthlyData[monthYear] = {
                             fyc: 0,
@@ -122,7 +123,7 @@
                     maximumFractionDigits: 0
                 });
 
-                // Update metrics
+                /* Update metrics with proper currency formatting */
                 document.getElementById("totalFYC").innerHTML = `Total FYC: ${formatCurrency.format(totalFYC)}`;
                 document.getElementById("totalGDC").innerHTML = `Total GDC: ${formatCurrency.format(totalGDC)}`;
                 document.getElementById("benGDC").innerHTML = `Ben GDC: ${formatCurrency.format(benGDC)}`;
@@ -179,6 +180,7 @@
             });
         }
 
+        /* Initialize dashboard */
         updateDashboard();
     </script>
 </body>
