@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClickUp Dashboard</title>
+    <title>Commission Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -75,7 +75,7 @@
             }
         }
 
-        async function updateDashboard() {
+            async function updateDashboard() {
             try {
                 const records = await fetchAirtableData();
                 
@@ -84,7 +84,7 @@
                     return;
                 }
 
-                 let totalFYC = 0, totalGDC = 0, benGDC = 0, joshGDC = 0;
+                let totalFYC = 0, totalGDC = 0, benGDC = 0, joshGDC = 0;
                 let monthlyData = {};
 
                 records.forEach(record => {
@@ -94,8 +94,8 @@
                     const gdc = parseFloat(record.fields["GDC"]) || 0;
                     const benGdcValue = parseFloat(record.fields["Ben GDC"]) || 0;
                     const joshGdcValue = parseFloat(record.fields["Josh GDC"]) || 0;
-
-                     // Get month from created time or a date field if available
+                    
+                    // Get month from created time or a date field if available
                     const date = new Date(record.fields["Created Time"] || record.createdTime);
                     const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
 
@@ -103,7 +103,6 @@
                     totalGDC += gdc;
                     benGDC += benGdcValue;
                     joshGDC += joshGdcValue;
-                });
 
                     // Aggregate monthly data for the chart
                     if (!monthlyData[monthYear]) {
@@ -161,61 +160,6 @@
                             borderWidth: 1
                         }
                     ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0
-                                }).format(value)
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        updateDashboard();
-    </script>
-</body>
-</html>
-                // Update metrics with proper formatting
-                document.getElementById("totalPremium").innerHTML = 
-                    `Total Premium: ${new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: 'USD'
-                    }).format(totalPremium)}`;
-                
-                document.getElementById("avgBenSplit").innerHTML = 
-                    `Avg Ben Split: ${(totalBenSplit / count || 0).toFixed(1)}%`;
-                
-                document.getElementById("avgJoshSplit").innerHTML = 
-                    `Avg Josh Split: ${(totalJoshSplit / count || 0).toFixed(1)}%`;
-
-                renderChart(products);
-            } catch (error) {
-                console.error("Error updating dashboard:", error);
-            }
-        }
-
-        function renderChart(products) {
-            const ctx = document.getElementById('chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(products),
-                    datasets: [{
-                        label: 'Premium by Product',
-                        data: Object.values(products),
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
                 },
                 options: {
                     responsive: true,
