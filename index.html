@@ -141,11 +141,12 @@
 
         async function fetchAirtableData() {
     try {
-        const url = `https://api.airtable.com/v0/${appHVsweCzGGS1xdB}/${tblarhtSpTj9hXpnU}`;
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${TABLE_ID}`;
         const response = await fetch(url, {
             headers: {
-                'Authorization': `Bearer ${patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143}`
-            }
+    'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+}
+
         });
 
         if (!response.ok) {
