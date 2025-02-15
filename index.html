@@ -135,16 +135,16 @@
 
     <script>
         // Configuration - Replace these with your actual Airtable details
-        const AIRTABLE_API_KEY = 'YOUR_API_KEY';
-        const BASE_ID = 'YOUR_BASE_ID';
-        const TABLE_NAME = 'YOUR_TABLE_NAME';
+        const AIRTABLE_API_KEY = "patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143";
+        const AIRTABLE_BASE_ID = "appHVsweCzGGS1xdB";
+        const TABLE_ID = "tblarhtSpTj9hXpnU";
 
         async function fetchAirtableData() {
             try {
-                const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+                const url = `https://airtable.com/appHVsweCzGGS1xdB/tblarhtSpTj9hXpnU`;
                 const response = await fetch(url, {
                     headers: {
-                        'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+                        'Authorization': `Bearer ${patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143}`
                     }
                 });
 
