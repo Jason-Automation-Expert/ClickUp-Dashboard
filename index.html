@@ -140,31 +140,31 @@
         const TABLE_ID = "tblarhtSpTj9hXpnU";
 
         async function fetchAirtableData() {
-            try {
-                const url = `https://airtable.com/appHVsweCzGGS1xdB/tblarhtSpTj9hXpnU`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `Bearer ${patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data from Airtable');
-                }
-
-                const data = await response.json();
-                return data.records.map(record => ({
-                    Status: record.fields.Status,
-                    'Total FYC': record.fields['Total FYC'],
-                    'Total GDC': record.fields['Total GDC'],
-                    'Ben GDC': record.fields['Ben GDC'],
-                    'Josh GDC': record.fields['Josh GDC']
-                }));
-            } catch (error) {
-                console.error('Error fetching Airtable data:', error);
-                throw error;
+    try {
+        const url = `https://api.airtable.com/v0/${appHVsweCzGGS1xdB}/${tblarhtSpTj9hXpnU}`;
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143}`
             }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch data from Airtable');
         }
+
+        const data = await response.json();
+        return data.records.map(record => ({
+            Status: record.fields.Status,
+            'Total FYC': record.fields['Total FYC'],
+            'Total GDC': record.fields['Total GDC'],
+            'Ben GDC': record.fields['Ben GDC'],
+            'Josh GDC': record.fields['Josh GDC']
+        }));
+    } catch (error) {
+        console.error('Error fetching Airtable data:', error);
+        throw error;
+    }
+}
 
         function updateDashboard(data) {
             // Initialize totals
