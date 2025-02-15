@@ -142,123 +142,115 @@
         async function fetchAirtableData() {
     try {
         const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${TABLE_ID}`;
+        console.log("Fetching from Airtable:", url);
+
         const response = await fetch(url, {
             headers: {
-    'Authorization': `Bearer ${AIRTABLE_API_KEY}`
-}
-
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`
+            }
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch data from Airtable');
+            throw new Error(`Failed to fetch Airtable data. Status: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log("Fetched Data:", data);
+
+        if (!data.records) {
+            throw new Error("No records returned from Airtable");
+        }
+
         return data.records.map(record => ({
-            Status: record.fields.Status,
-            'Total FYC': record.fields['Total FYC'],
-            'Total GDC': record.fields['Total GDC'],
-            'Ben GDC': record.fields['Ben GDC'],
-            'Josh GDC': record.fields['Josh GDC']
+            Status: record.fields.Status || "Unknown",
+            'Total FYC': record.fields['Total FYC'] || 0,
+            'Total GDC': record.fields['Total GDC'] || 0,
+            'Ben GDC': record.fields['Ben GDC'] || 0,
+            'Josh GDC': record.fields['Josh GDC'] || 0
         }));
     } catch (error) {
-        console.error('Error fetching Airtable data:', error);
+        console.error("Error fetching Airtable data:", error);
         throw error;
     }
 }
 
-        function updateDashboard(data) {
-            // Initialize totals
-            let totals = {
-                totalFYC: 0,
-                totalGDC: 0,
-                benGDC: 0,
-                joshGDC: 0
-            };
+function updateDashboard(data) {
+    let totals = {
+        totalFYC: 0,
+        totalGDC: 0,
+        benGDC: 0,
+        joshGDC: 0
+    };
 
-            // Group data by status
-            const groupedData = data.reduce((acc, record) => {
-                const status = record.Status.toLowerCase().replace(/\s+/g, '-');
-                if (!acc[status]) {
-                    acc[status] = {
-                        totalFYC: 0,
-                        totalGDC: 0,
-                        benGDC: 0,
-                        joshGDC: 0
-                    };
-                }
-                
-                const fyc = Number(record['Total FYC'] || 0);
-                const totalGDC = Number(record['Total GDC'] || 0);
-                const benGDC = Number(record['Ben GDC'] || 0);
-                const joshGDC = Number(record['Josh GDC'] || 0);
+    const groupedData = data.reduce((acc, record) => {
+        const status = record.Status.toLowerCase().replace(/\s+/g, '-');
+        console.log("Processing status:", status); // Debugging
 
-                acc[status].totalFYC += fyc;
-                acc[status].totalGDC += totalGDC;
-                acc[status].benGDC += benGDC;
-                acc[status].joshGDC += joshGDC;
-
-                // Update totals
-                totals.totalFYC += fyc;
-                totals.totalGDC += totalGDC;
-                totals.benGDC += benGDC;
-                totals.joshGDC += joshGDC;
-                
-                return acc;
-            }, {});
-
-            // Format function for currency
-            const formatCurrency = (value) => 
-                value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-            // Update the dashboard with the grouped data
-            for (const [status, values] of Object.entries(groupedData)) {
-                const elements = {
-                    fyc: document.getElementById(`${status}-fyc`),
-                    totalGdc: document.getElementById(`${status}-total-gdc`),
-                    benGdc: document.getElementById(`${status}-ben-gdc`),
-                    joshGdc: document.getElementById(`${status}-josh-gdc`)
-                };
-
-                if (elements.fyc) elements.fyc.textContent = formatCurrency(values.totalFYC);
-                if (elements.totalGdc) elements.totalGdc.textContent = formatCurrency(values.totalGDC);
-                if (elements.benGdc) elements.benGdc.textContent = formatCurrency(values.benGDC);
-                if (elements.joshGdc) elements.joshGdc.textContent = formatCurrency(values.joshGDC);
-            }
-
-            // Update totals row
-            document.getElementById('total-fyc').textContent = formatCurrency(totals.totalFYC);
-            document.getElementById('total-gdc').textContent = formatCurrency(totals.totalGDC);
-            document.getElementById('total-ben-gdc').textContent = formatCurrency(totals.benGDC);
-            document.getElementById('total-josh-gdc').textContent = formatCurrency(totals.joshGDC);
+        if (!acc[status]) {
+            acc[status] = { totalFYC: 0, totalGDC: 0, benGDC: 0, joshGDC: 0 };
         }
 
-        // Initialize the dashboard
-        async function initDashboard() {
-            const loadingElement = document.getElementById('loading');
-            const dashboardContent = document.getElementById('dashboard-content');
-            const errorMessage = document.getElementById('error-message');
+        acc[status].totalFYC += Number(record['Total FYC']);
+        acc[status].totalGDC += Number(record['Total GDC']);
+        acc[status].benGDC += Number(record['Ben GDC']);
+        acc[status].joshGDC += Number(record['Josh GDC']);
 
-            try {
-                const data = await fetchAirtableData();
-                updateDashboard(data);
-                loadingElement.style.display = 'none';
-                dashboardContent.style.display = 'grid';
-                
-                // Refresh data every 5 minutes
-                setInterval(async () => {
-                    const newData = await fetchAirtableData();
-                    updateDashboard(newData);
-                }, 5 * 60 * 1000);
-            } catch (error) {
-                loadingElement.style.display = 'none';
-                errorMessage.textContent = 'Error loading dashboard data. Please check your Airtable configuration.';
-                errorMessage.style.display = 'block';
-            }
-        }
+        totals.totalFYC += Number(record['Total FYC']);
+        totals.totalGDC += Number(record['Total GDC']);
+        totals.benGDC += Number(record['Ben GDC']);
+        totals.joshGDC += Number(record['Josh GDC']);
 
-        // Start the dashboard
-        initDashboard();
+        return acc;
+    }, {});
+
+    const formatCurrency = (value) => value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    for (const [status, values] of Object.entries(groupedData)) {
+        console.log(`Updating UI for status: ${status}`); // Debugging
+
+        const elements = {
+            fyc: document.getElementById(`${status}-fyc`),
+            totalGdc: document.getElementById(`${status}-total-gdc`),
+            benGdc: document.getElementById(`${status}-ben-gdc`),
+            joshGdc: document.getElementById(`${status}-josh-gdc`)
+        };
+
+        if (elements.fyc) elements.fyc.textContent = formatCurrency(values.totalFYC);
+        if (elements.totalGdc) elements.totalGdc.textContent = formatCurrency(values.totalGDC);
+        if (elements.benGdc) elements.benGdc.textContent = formatCurrency(values.benGDC);
+        if (elements.joshGdc) elements.joshGdc.textContent = formatCurrency(values.joshGDC);
+    }
+
+    document.getElementById('total-fyc').textContent = formatCurrency(totals.totalFYC);
+    document.getElementById('total-gdc').textContent = formatCurrency(totals.totalGDC);
+    document.getElementById('total-ben-gdc').textContent = formatCurrency(totals.benGDC);
+    document.getElementById('total-josh-gdc').textContent = formatCurrency(totals.joshGDC);
+}
+
+async function initDashboard() {
+    const loadingElement = document.getElementById('loading');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const errorMessage = document.getElementById('error-message');
+
+    try {
+        const data = await fetchAirtableData();
+        updateDashboard(data);
+        loadingElement.style.display = 'none';
+        dashboardContent.style.display = 'grid';
+
+        setInterval(async () => {
+            const newData = await fetchAirtableData();
+            updateDashboard(newData);
+        }, 5 * 60 * 1000);
+    } catch (error) {
+        loadingElement.style.display = 'none';
+        errorMessage.textContent = 'Error loading dashboard data. Please check your Airtable configuration.';
+        errorMessage.style.display = 'block';
+    }
+}
+
+initDashboard();
+
     </script>
 </body>
 </html>
