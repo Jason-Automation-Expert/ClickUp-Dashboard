@@ -54,10 +54,10 @@
         /* Configuration */
        const AIRTABLE_API_KEY = "patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143";
         const AIRTABLE_BASE_ID = "appHVsweCzGGS1xdB";
-        const TABLE_ID = "tblSWJ7dkHmarMFCH";
+        const TABLE_ID = "tblarhtSpTj9hXpnU";
 
         async function fetchAirtableData() {
-            const url = `https://api.airtable.com/v0/${appHVsweCzGGS1xdB}/${encodeURIComponent(tblSWJ7dkHmarMFCH)}`;
+            const url = `https://api.airtable.com/v0/${appHVsweCzGGS1xdB}/${encodeURIComponent(tblarhtSpTj9hXpnU)}`;
             try {
                 const response = await fetch(url, {
                     headers: {
@@ -93,8 +93,8 @@
                 records.forEach(record => {
                     if (!record.fields) return;
                     
-                    const fyc = parseFloat(record.fields["FYC"]) || 0;
-                    const gdc = parseFloat(record.fields["GDC"]) || 0;
+                    const fyc = parseFloat(record.fields["Total FYC"]) || 0;
+                    const gdc = parseFloat(record.fields["Total GDC"]) || 0;
                     const benGdcValue = parseFloat(record.fields["Ben GDC"]) || 0;
                     const joshGdcValue = parseFloat(record.fields["Josh GDC"]) || 0;
                     
@@ -147,14 +147,14 @@
                     labels: months,
                     datasets: [
                         {
-                            label: 'FYC',
+                            label: 'Total FYC',
                             data: fycData,
                             backgroundColor: 'rgba(54, 162, 235, 0.5)',
                             borderColor: 'rgba(54, 162, 235, 1)',
                             borderWidth: 1
                         },
                         {
-                            label: 'GDC',
+                            label: 'Total GDC',
                             data: gdcData,
                             backgroundColor: 'rgba(255, 99, 132, 0.5)',
                             borderColor: 'rgba(255, 99, 132, 1)',
