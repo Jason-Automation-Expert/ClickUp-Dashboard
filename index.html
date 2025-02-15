@@ -3,185 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commission Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Insurance Dashboard</title>
     <style>
+        /* Previous styles remain the same */
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f8f9fa;
-        }
-        .container {
-            width: 80%;
-            margin: auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
             padding: 20px;
+            background-color: #f5f7f9;
+        }
+        .dashboard-card {
             background: white;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-        .metrics {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .card {
             padding: 20px;
-            background: #007bff;
-            color: white;
-            border-radius: 5px;
-            width: calc(25% - 20px);
-            min-width: 200px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .dashboard-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: auto repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .header {
+            font-weight: 600;
+            color: #666;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            text-align: right;
+        }
+        .header.status-header {
+            text-align: left;
+        }
+        .data-row {
+            display: contents;
+        }
+        .data-cell {
+            padding: 12px;
+            border-radius: 6px;
+            background: #fff;
+            text-align: right;
+        }
+        .data-cell.status-cell {
+            font-weight: 500;
+            color: #2c3e50;
+            text-align: left;
+            background: #f8f9fa;
+        }
+        .total-row {
+            display: contents;
+        }
+        .total-row .data-cell {
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .error {
+            color: #dc3545;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #fce8e8;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Commission Dashboard</h2>
-        
-        <div class="metrics">
-            <div class="card" id="totalFYC">Loading...</div>
-            <div class="card" id="totalGDC">Loading...</div>
-            <div class="card" id="benGDC">Loading...</div>
-            <div class="card" id="joshGDC">Loading...</div>
-        </div>
+    <div class="dashboard-card">
+        <div class="dashboard-title">Insurance Dashboard</div>
+        <div id="error-message" class="error" style="display: none;"></div>
+        <div id="loading" class="loading">Loading data...</div>
+        <div class="data-grid" id="dashboard-content" style="display: none;">
+            <!-- Headers -->
+            <div class="header status-header">Status</div>
+            <div class="header">Total FYC</div>
+            <div class="header">Total GDC</div>
+            <div class="header">Ben GDC</div>
+            <div class="header">Josh GDC</div>
 
-        <canvas id="chart"></canvas>
+            <!-- New Status Row -->
+            <div class="data-row">
+                <div class="data-cell status-cell">New</div>
+                <div class="data-cell">$<span id="new-fyc">0</span></div>
+                <div class="data-cell">$<span id="new-total-gdc">0</span></div>
+                <div class="data-cell">$<span id="new-ben-gdc">0</span></div>
+                <div class="data-cell">$<span id="new-josh-gdc">0</span></div>
+            </div>
+
+            <!-- In Progress Row -->
+            <div class="data-row">
+                <div class="data-cell status-cell">In Progress</div>
+                <div class="data-cell">$<span id="progress-fyc">0</span></div>
+                <div class="data-cell">$<span id="progress-total-gdc">0</span></div>
+                <div class="data-cell">$<span id="progress-ben-gdc">0</span></div>
+                <div class="data-cell">$<span id="progress-josh-gdc">0</span></div>
+            </div>
+
+            <!-- Completed Row -->
+            <div class="data-row">
+                <div class="data-cell status-cell">Completed</div>
+                <div class="data-cell">$<span id="completed-fyc">0</span></div>
+                <div class="data-cell">$<span id="completed-total-gdc">0</span></div>
+                <div class="data-cell">$<span id="completed-ben-gdc">0</span></div>
+                <div class="data-cell">$<span id="completed-josh-gdc">0</span></div>
+            </div>
+
+            <!-- Total Row -->
+            <div class="total-row">
+                <div class="data-cell status-cell">Total</div>
+                <div class="data-cell">$<span id="total-fyc">0</span></div>
+                <div class="data-cell">$<span id="total-gdc">0</span></div>
+                <div class="data-cell">$<span id="total-ben-gdc">0</span></div>
+                <div class="data-cell">$<span id="total-josh-gdc">0</span></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        /* Configuration */
-       const AIRTABLE_API_KEY = "patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143";
-        const AIRTABLE_BASE_ID = "appHVsweCzGGS1xdB";
-        const TABLE_ID = "tblarhtSpTj9hXpnU";
+        // Configuration - Replace these with your actual Airtable details
+        const AIRTABLE_API_KEY = 'YOUR_API_KEY';
+        const BASE_ID = 'YOUR_BASE_ID';
+        const TABLE_NAME = 'YOUR_TABLE_NAME';
 
         async function fetchAirtableData() {
-            const url = `https://api.airtable.com/v0/${appHVsweCzGGS1xdB}/${encodeURIComponent(tblarhtSpTj9hXpnU)}`;
             try {
+                const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
                 const response = await fetch(url, {
                     headers: {
-                        "Authorization": `Bearer ${patO0L1ZJwc8g8EXq.27e9324b50ab47e042120f048a446a4fbc70f91927d2d783057fe6b27af3c143}`,
-                        "Content-Type": "application/json"
+                        'Authorization': `Bearer ${AIRTABLE_API_KEY}`
                     }
                 });
-                
+
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error('Failed to fetch data from Airtable');
                 }
-                
+
                 const data = await response.json();
-                return data.records;
+                return data.records.map(record => ({
+                    Status: record.fields.Status,
+                    'Total FYC': record.fields['Total FYC'],
+                    'Total GDC': record.fields['Total GDC'],
+                    'Ben GDC': record.fields['Ben GDC'],
+                    'Josh GDC': record.fields['Josh GDC']
+                }));
             } catch (error) {
-                console.error("Error fetching Airtable data:", error);
-                return [];
+                console.error('Error fetching Airtable data:', error);
+                throw error;
             }
         }
 
-        async function updateDashboard() {
-            try {
-                const records = await fetchAirtableData();
+        function updateDashboard(data) {
+            // Initialize totals
+            let totals = {
+                totalFYC: 0,
+                totalGDC: 0,
+                benGDC: 0,
+                joshGDC: 0
+            };
+
+            // Group data by status
+            const groupedData = data.reduce((acc, record) => {
+                const status = record.Status.toLowerCase().replace(/\s+/g, '-');
+                if (!acc[status]) {
+                    acc[status] = {
+                        totalFYC: 0,
+                        totalGDC: 0,
+                        benGDC: 0,
+                        joshGDC: 0
+                    };
+                }
                 
-                if (!records.length) {
-                    console.warn("No records found");
-                    return;
-                }
+                const fyc = Number(record['Total FYC'] || 0);
+                const totalGDC = Number(record['Total GDC'] || 0);
+                const benGDC = Number(record['Ben GDC'] || 0);
+                const joshGDC = Number(record['Josh GDC'] || 0);
 
-                let totalFYC = 0, totalGDC = 0, benGDC = 0, joshGDC = 0;
-                let monthlyData = {};
+                acc[status].totalFYC += fyc;
+                acc[status].totalGDC += totalGDC;
+                acc[status].benGDC += benGDC;
+                acc[status].joshGDC += joshGDC;
 
-                records.forEach(record => {
-                    if (!record.fields) return;
-                    
-                    const fyc = parseFloat(record.fields["Total FYC"]) || 0;
-                    const gdc = parseFloat(record.fields["Total GDC"]) || 0;
-                    const benGdcValue = parseFloat(record.fields["Ben GDC"]) || 0;
-                    const joshGdcValue = parseFloat(record.fields["Josh GDC"]) || 0;
-                    
-                    const date = new Date(record.fields["Created Time"] || record.createdTime);
-                    const monthYear = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                // Update totals
+                totals.totalFYC += fyc;
+                totals.totalGDC += totalGDC;
+                totals.benGDC += benGDC;
+                totals.joshGDC += joshGDC;
+                
+                return acc;
+            }, {});
 
-                    totalFYC += fyc;
-                    totalGDC += gdc;
-                    benGDC += benGdcValue;
-                    joshGDC += joshGdcValue;
+            // Format function for currency
+            const formatCurrency = (value) => 
+                value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-                    if (!monthlyData[monthYear]) {
-                        monthlyData[monthYear] = {
-                            fyc: 0,
-                            gdc: 0
-                        };
-                    }
-                    monthlyData[monthYear].fyc += fyc;
-                    monthlyData[monthYear].gdc += gdc;
-                });
+            // Update the dashboard with the grouped data
+            for (const [status, values] of Object.entries(groupedData)) {
+                const elements = {
+                    fyc: document.getElementById(`${status}-fyc`),
+                    totalGdc: document.getElementById(`${status}-total-gdc`),
+                    benGdc: document.getElementById(`${status}-ben-gdc`),
+                    joshGdc: document.getElementById(`${status}-josh-gdc`)
+                };
 
-                const formatCurrency = new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                });
+                if (elements.fyc) elements.fyc.textContent = formatCurrency(values.totalFYC);
+                if (elements.totalGdc) elements.totalGdc.textContent = formatCurrency(values.totalGDC);
+                if (elements.benGdc) elements.benGdc.textContent = formatCurrency(values.benGDC);
+                if (elements.joshGdc) elements.joshGdc.textContent = formatCurrency(values.joshGDC);
+            }
 
-                /* Update metrics with proper currency formatting */
-                document.getElementById("totalFYC").innerHTML = `Total FYC: ${formatCurrency.format(totalFYC)}`;
-                document.getElementById("totalGDC").innerHTML = `Total GDC: ${formatCurrency.format(totalGDC)}`;
-                document.getElementById("benGDC").innerHTML = `Ben GDC: ${formatCurrency.format(benGDC)}`;
-                document.getElementById("joshGDC").innerHTML = `Josh GDC: ${formatCurrency.format(joshGDC)}`;
+            // Update totals row
+            document.getElementById('total-fyc').textContent = formatCurrency(totals.totalFYC);
+            document.getElementById('total-gdc').textContent = formatCurrency(totals.totalGDC);
+            document.getElementById('total-ben-gdc').textContent = formatCurrency(totals.benGDC);
+            document.getElementById('total-josh-gdc').textContent = formatCurrency(totals.joshGDC);
+        }
 
-                renderChart(monthlyData);
+        // Initialize the dashboard
+        async function initDashboard() {
+            const loadingElement = document.getElementById('loading');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const errorMessage = document.getElementById('error-message');
+
+            try {
+                const data = await fetchAirtableData();
+                updateDashboard(data);
+                loadingElement.style.display = 'none';
+                dashboardContent.style.display = 'grid';
+                
+                // Refresh data every 5 minutes
+                setInterval(async () => {
+                    const newData = await fetchAirtableData();
+                    updateDashboard(newData);
+                }, 5 * 60 * 1000);
             } catch (error) {
-                console.error("Error updating dashboard:", error);
+                loadingElement.style.display = 'none';
+                errorMessage.textContent = 'Error loading dashboard data. Please check your Airtable configuration.';
+                errorMessage.style.display = 'block';
             }
         }
 
-        function renderChart(monthlyData) {
-            const months = Object.keys(monthlyData).sort();
-            const fycData = months.map(month => monthlyData[month].fyc);
-            const gdcData = months.map(month => monthlyData[month].gdc);
-
-            const ctx = document.getElementById('chart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: months,
-                    datasets: [
-                        {
-                            label: 'Total FYC',
-                            data: fycData,
-                            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Total GDC',
-                            data: gdcData,
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: value => new Intl.NumberFormat('en-US', {
-                                    style: 'currency',
-                                    currency: 'USD',
-                                    minimumFractionDigits: 0
-                                }).format(value)
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        /* Initialize dashboard */
-        updateDashboard();
+        // Start the dashboard
+        initDashboard();
     </script>
 </body>
 </html>
